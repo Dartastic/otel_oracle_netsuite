@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_oracle_netsuite_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_oracle_netsuite';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class OracleNetSuiteResult {
+  /// Creates a result.
   const OracleNetSuiteResult({
     this.account,
     this.surface,
@@ -82,8 +83,13 @@ class OracleNetSuiteResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class OracleNetSuiteCallResult<T> {
+  /// Creates a call result.
   const OracleNetSuiteCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final OracleNetSuiteResult? result;
 }
@@ -116,7 +122,7 @@ Future<T> tracedOracleNetSuite<T>({
   final span = _tracer().startSpan(
     'oracle_netsuite $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
@@ -124,110 +130,110 @@ Future<T> tracedOracleNetSuite<T>({
       final res = r.result!;
       final extras = <Attribute<Object>>[];
       if (res.account != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.account',
           res.account!,
         ));
       }
       if (res.surface != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.surface',
           res.surface!,
         ));
       }
       if (res.recordType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.record.type',
           res.recordType!,
         ));
       }
       if (res.recordId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.record.id',
           res.recordId!,
         ));
       }
       if (res.action != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.action',
           res.action!,
         ));
       }
       if (res.scriptType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.script.type',
           res.scriptType!,
         ));
       }
       if (res.scriptId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.script.id',
           res.scriptId!,
         ));
       }
       if (res.deploymentId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.deployment.id',
           res.deploymentId!,
         ));
       }
       if (res.usagePoints != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'oracle_netsuite.usage.points',
           res.usagePoints!,
         ));
       }
       if (res.governanceRemaining != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'oracle_netsuite.governance.remaining',
           res.governanceRemaining!,
         ));
       }
       if (res.subsidiary != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.subsidiary',
           res.subsidiary!,
         ));
       }
       if (res.queryReturnedCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'oracle_netsuite.query.returned_count',
           res.queryReturnedCount!,
         ));
       }
       if (res.batchSize != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'oracle_netsuite.batch.size',
           res.batchSize!,
         ));
       }
       if (res.suiteQlReturned != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'oracle_netsuite.suiteql.returned',
           res.suiteQlReturned!,
         ));
       }
       if (res.fileSizeBytes != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'oracle_netsuite.file.size_bytes',
           res.fileSizeBytes!,
         ));
       }
       if (res.errorCode != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.error.code',
           res.errorCode!,
         ));
         span.setStatus(SpanStatusCode.Error, 'NetSuite ${res.errorCode}');
       }
       if (res.errorMessage != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'oracle_netsuite.error.message',
           res.errorMessage!,
         ));
       }
       if (res.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           res.statusCode!,
         ));
@@ -238,13 +244,13 @@ Future<T> tracedOracleNetSuite<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
